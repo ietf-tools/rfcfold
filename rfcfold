@@ -54,9 +54,14 @@ print_usage() {
   printf "  -d: show debug messages (unless -q is given)\n"
   printf "  -q: quiet (suppress error and debug messages)\n"
   printf "  -h: show this message\n"
+  printf "  -V: print version information\n"
   printf "\n"
   printf "Exit status code: 1 on error, 0 on success, 255 on no-op."
   printf "\n\n"
+}
+
+print_version() {
+  printf -- '%s version %s\n' "$prog_name" "$prog_version"
 }
 
 # global vars, do not edit
@@ -74,6 +79,7 @@ equal_chars="======================================================="
 space_chars="                                                       "
 temp_dir=""
 prog_name='rfcfold'
+prog_version='1.0.0'
 
 # functions for diagnostic messages
 prog_msg() {
@@ -291,6 +297,9 @@ process_input() {
   while [[ "$1" != "" ]]; do
     if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
       print_usage
+      exit 0
+    elif [[ "$1" == "-V" ]] || [[ "$1" == "--version" ]]; then
+      print_version
       exit 0
     elif [[ "$1" == "-d" ]]; then
       debug=1

@@ -88,7 +88,21 @@ test_prefolded_file() {
 }
 
 
+failed_test() {
+  echo 'failed.'
+  exit 1
+}
+
+
 main() {
+  printf 'starting tests for -h/--help options...'
+  ../rfcfold -h | grep -Fq 'Usage:' || failed_test
+  ../rfcfold --help | grep -Fq 'Usage:' || failed_test
+  echo 'okay.'
+  printf 'starting tests for -V/--version options...'
+  ../rfcfold -V | grep -Eq 'version +[0-9]+\.[0-9]+\.[0-9]+' || failed_test
+  ../rfcfold --version | grep -Eq 'version +[0-9]+\.[0-9]+\.[0-9]+' || failed_test
+  echo 'okay.'
   echo
   echo "starting neither tests..."
   test_file 1 neither-can-fold-it-1.txt 1
