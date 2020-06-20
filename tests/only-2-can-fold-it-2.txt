@@ -1,0 +1,5 @@
+# file needs folding, but contains a line that has a space characters
+# past the maxmimum folding column
+
+12345678901234567890123456789012345678901234567890123456789012345678901
+                                                                      1
