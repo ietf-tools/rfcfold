@@ -79,7 +79,7 @@ equal_chars="======================================================="
 space_chars="                                                       "
 temp_dir=""
 prog_name='rfcfold'
-prog_version='1.0.0'
+prog_version='1.0.1'
 
 # functions for diagnostic messages
 prog_msg() {
@@ -146,7 +146,7 @@ fold_it_1() {
                    "$hdr_txt_1" "$right_sp" "$equal_chars")
 
   # generate outfile
-  echo "$header" > "$outfile"
+  printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
   "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\n\2/;t M;b;:M;P;D;'\
     < "$infile" >> "$outfile" 2> /dev/null
@@ -179,7 +179,7 @@ fold_it_2() {
                    "$hdr_txt_2" "$right_sp" "$equal_chars")
 
   # generate outfile
-  echo "$header" > "$outfile"
+  printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
   "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\n\\\2/;t M;b;:M;P;D;'\
     < "$infile" >> "$outfile" 2> /dev/null
@@ -270,7 +270,7 @@ unfold_it() {
   # check if file needs unfolding
   line=$(head -n 1 "$infile")
   line2=$("$SED" -n '2p' "$infile")
-  result=$(echo "$line" | fgrep "$hdr_txt_1")
+  result=$(printf -- '%s\n' "$line" | fgrep "$hdr_txt_1")
   if [[ $? -eq 0 ]]; then
     if [[ -n "$line2" ]]; then
       err "the second line in '$infile' is not empty."
@@ -279,7 +279,7 @@ unfold_it() {
     unfold_it_1
     return $?
   fi
-  result=$(echo "$line" | fgrep "$hdr_txt_2")
+  result=$(printf -- '%s\n' "$line" | fgrep "$hdr_txt_2")
   if [[ $? -eq 0 ]]; then
     if [[ -n "$line2" ]]; then
       err "the second line in '$infile' is not empty."
