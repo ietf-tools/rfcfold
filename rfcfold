@@ -75,7 +75,6 @@ maxcol=69  # default, may be overridden by param
 col_gvn=0  # maxcol overridden?
 hdr_txt_1="NOTE: '\\' line wrapping per RFC 8792"
 hdr_txt_2="NOTE: '\\\\' line wrapping per RFC 8792"
-equal_chars="======================================================="
 temp_dir=""
 prog_name='rfcfold'
 prog_version='1.0.1'
@@ -115,6 +114,14 @@ cleanup() {
 }
 trap 'cleanup' EXIT
 
+equal_chars() {
+  if { test -z "$1" || test "$1" -lt 1; }; then
+    err 'function equal_chars() requires a positive number.'
+    exit 1
+  fi
+  printf -- '% *s\n' "$1" ' ' | tr ' ' '='
+}
+
 fold_it_1() {
   # ensure input file doesn't contain the fold-sequence already
   if [[ -n "$("$SED" -n '/\\$/p' "$infile")" ]]; then
@@ -141,8 +148,8 @@ fold_it_1() {
   length=$(expr ${#hdr_txt_1} + 2)
   left_sp=$(expr \( "$maxcol" - "$length" \) / 2)
   right_sp=$(expr "$maxcol" - "$length" - "$left_sp")
-  header=$(printf "%.*s %s %.*s" "$left_sp" "$equal_chars"\
-                   "$hdr_txt_1" "$right_sp" "$equal_chars")
+  header=$(printf -- '%s %s %s' "$(equal_chars "$left_sp")" \
+                     "$hdr_txt_1" "$(equal_chars "$right_sp")")
 
   # generate outfile
   printf -- '%s\n' "$header" > "$outfile"
@@ -174,8 +181,8 @@ fold_it_2() {
   length=$(expr ${#hdr_txt_2} + 2)
   left_sp=$(expr \( "$maxcol" - "$length" \) / 2)
   right_sp=$(expr "$maxcol" - "$length" - "$left_sp")
-  header=$(printf "%.*s %s %.*s" "$left_sp" "$equal_chars"\
-                   "$hdr_txt_2" "$right_sp" "$equal_chars")
+  header=$(printf -- '%s %s %s' "$(equal_chars "$left_sp")" \
+                     "$hdr_txt_2" "$(equal_chars "$right_sp")")
 
   # generate outfile
   printf -- '%s\n' "$header" > "$outfile"
@@ -367,14 +374,6 @@ process_input() {
   fi
   if [[ "$maxcol" -lt "$min_supported" ]]; then
     err "the folding column cannot be less than $min_supported."
-    exit 1
-  fi
-
-  # this is only because the code otherwise runs out of equal_chars
-  max_supported=$(expr ${#equal_chars} + 1 + ${#hdr_txt_1} + 1\
-       + ${#equal_chars})
-  if [[ "$maxcol" -gt "$max_supported" ]]; then
-    err "the folding column cannot be more than $max_supported."
     exit 1
   fi
 }

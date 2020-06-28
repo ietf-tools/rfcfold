@@ -176,11 +176,21 @@ main() {
   test_file 2 example-1.txt            1   x  44
   test_file 2 example-1.txt            0   0  45
   echo
-  echo "starting maximum folding column tests..."
+  echo "starting no folding column limit tests..."
   test_file 1 example-2.txt            0   0 148
-  test_file 1 example-2.txt            1   x 149
+  test_file 1 example-2.txt            0   0 149
   test_file 2 example-2.txt            0   0 148
-  test_file 2 example-2.txt            1   x 149
+  test_file 2 example-2.txt            0   0 149
+  test_file 1 example-2.txt            0   0 279
+  test_file 2 example-2.txt            0   0 279
+  test_file 1 example-2.txt          255 255 280
+  test_file 2 example-2.txt          255 255 280
+  test_file 1 spaces-1.txt           255 255  70
+  test_file 2 spaces-1.txt           255 255  70
+  test_file 1 spaces-2.txt           255 255 140
+  test_file 2 spaces-2.txt           255 255 140
+  test_file 1 spaces-3.txt           255 255 210
+  test_file 2 spaces-3.txt           255 255 210
   echo
   printf "testing unfolding of smart folding examples 3.1 and 3.2..."
   expected_exit_code=0
