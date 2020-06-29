@@ -176,21 +176,28 @@ main() {
   test_file 2 example-1.txt            1   x  44
   test_file 2 example-1.txt            0   0  45
   echo
-  echo "starting no folding column limit tests..."
-  test_file 1 example-2.txt            0   0 148
-  test_file 1 example-2.txt            0   0 149
-  test_file 2 example-2.txt            0   0 148
-  test_file 2 example-2.txt            0   0 149
-  test_file 1 example-2.txt            0   0 279
-  test_file 2 example-2.txt            0   0 279
-  test_file 1 example-2.txt          255 255 280
-  test_file 2 example-2.txt          255 255 280
+  # A folding column limit is imposed by the regular expression implementation
+  # used by the system.  The given folding column + 1 must be less than the
+  # system limit for a regular expression repeat cound inside \{\}.
+  echo "starting folding column limit tests..."
   test_file 1 spaces-1.txt           255 255  70
   test_file 2 spaces-1.txt           255 255  70
   test_file 1 spaces-2.txt           255 255 140
   test_file 2 spaces-2.txt           255 255 140
+  test_file 1 example-2.txt            0   0 148
+  test_file 1 example-2.txt            0   0 149
+  test_file 2 example-2.txt            0   0 148
+  test_file 2 example-2.txt            0   0 149
   test_file 1 spaces-3.txt           255 255 210
   test_file 2 spaces-3.txt           255 255 210
+  test_file 1 example-2.txt            0   0 254
+  test_file 2 example-2.txt            0   0 254
+  # 2^24=16777216 is higher than all observed repeat count limits so far:
+  # - macOS and FreeBSD have a documented limit of 255 --> -c <=   254
+  # - Go imposes a limit of 1000                       --> -c <=   999
+  # - GNU imposes a limit of 32767                     --> -c <= 32766
+  # - PCRE imposes a limit of 65535                    --> -c <= 65534
+  test_file 1 example-2.txt            1   x 16777216
   echo
   printf "testing unfolding of smart folding examples 3.1 and 3.2..."
   expected_exit_code=0

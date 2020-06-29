@@ -376,6 +376,11 @@ process_input() {
     err "the folding column cannot be less than $min_supported."
     exit 1
   fi
+  dbg "testing support for given folding column value '$maxcol'..."
+  echo a | grep -q "a\{1,$((maxcol+1))\}" || {
+    err "folding column '$maxcol' is too big for this system."
+    exit 1
+  }
 }
 
 main() {
