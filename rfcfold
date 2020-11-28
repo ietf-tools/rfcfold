@@ -105,10 +105,6 @@ dbg() {
 # determine name of [g]sed binary
 type gsed > /dev/null 2>&1 && SED=gsed || SED=sed
 
-# warn if a non-GNU sed utility is used
-"$SED" --version < /dev/null 2> /dev/null | grep -q GNU || \
-warn 'not using GNU `sed` (likely cause if an error occurs).'
-
 cleanup() {
   rm -rf "$temp_dir"
 }
