@@ -384,8 +384,8 @@ process_input() {
   }
   dbg "testing sed support for folding column value '$maxcol'..."
   # foldcol == maxcol - 1
-  echo a | sed -n "s/a\{1,$((maxcol-1))\}//" || {
-    err "folding column '$maxcol' is too big for sed."
+  echo a | "$SED" -n "s/a\{1,$((maxcol-1))\}//" || {
+    err "folding column '$maxcol' is too big for '$SED'."
     exit 1
   }
 }
