@@ -154,8 +154,11 @@ fold_it_1() {
   # generate outfile
   printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
-  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\n\2/;t M;b;:M;P;D'\
-    < "$infile" >> "$outfile" 2> /dev/null
+  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
+\2/;t M
+    b
+    :M
+    P;D' < "$infile" >> "$outfile" 2> /dev/null
   if [[ $? -ne 0 ]]; then
     return 1
   fi
@@ -167,7 +170,9 @@ fold_it_2() {
   foldcol=$(expr "$maxcol" - 1) # for the inserted '\' char
 
   # ensure input file doesn't contain the fold-sequence already
-  if [[ -n "$("$SED" -n '/\\$/{N;s/\\\n[ ]*\\/&/p;D}' "$infile")" ]]
+  if [[ -n "$("$SED" -n '/\\$/{
+                N;s/\\\n[ ]*\\/&/p;D
+              }' "$infile")" ]]
   then
     err "infile '$infile' has a line ending with a '\\' character"\
         "followed by a '\\' character as the first non-space"\
@@ -187,8 +192,11 @@ fold_it_2() {
   # generate outfile
   printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
-  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\n\\\2/;t M;b;:M;P;D'\
-    < "$infile" >> "$outfile" 2> /dev/null
+  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
+\\\2/;t M
+    b
+    :M
+    P;D' < "$infile" >> "$outfile" 2> /dev/null
   if [[ $? -ne 0 ]]; then
     return 1
   fi
@@ -254,7 +262,9 @@ unfold_it_1() {
   awk "NR>2" "$infile" > "$temp_dir/wip"
 
   # unfold wip file
-  "$SED" '{H;$!d};x;s/^\n//;s/\\\n *//g' "$temp_dir/wip" > "$outfile"
+  "$SED" '{
+      H;$!d
+    };x;s/^\n//;s/\\\n *//g' "$temp_dir/wip" > "$outfile"
 
   return $?
 }
@@ -266,8 +276,9 @@ unfold_it_2() {
   awk "NR>2" "$infile" > "$temp_dir/wip"
 
   # unfold wip file
-  "$SED" '{H;$!d};x;s/^\n//;s/\\\n *\\//g' "$temp_dir/wip"\
-    > "$outfile"
+  "$SED" '{
+      H;$!d
+    };x;s/^\n//;s/\\\n *\\//g' "$temp_dir/wip" > "$outfile"
 
   return $?
 }
