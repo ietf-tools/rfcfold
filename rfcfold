@@ -154,7 +154,7 @@ fold_it_1() {
   # generate outfile
   printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
-  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\n\2/;t M;b;:M;P;D;'\
+  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\n\2/;t M;b;:M;P;D'\
     < "$infile" >> "$outfile" 2> /dev/null
   if [[ $? -ne 0 ]]; then
     return 1
@@ -187,7 +187,7 @@ fold_it_2() {
   # generate outfile
   printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
-  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\n\\\2/;t M;b;:M;P;D;'\
+  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\n\\\2/;t M;b;:M;P;D'\
     < "$infile" >> "$outfile" 2> /dev/null
   if [[ $? -ne 0 ]]; then
     return 1
