@@ -256,7 +256,7 @@ unfold_it_1() {
   # unfold wip file
   "$SED" '{H;$!d};x;s/^\n//;s/\\\n *//g' "$temp_dir/wip" > "$outfile"
 
-  return 0
+  return $?
 }
 
 unfold_it_2() {
@@ -269,7 +269,7 @@ unfold_it_2() {
   "$SED" '{H;$!d};x;s/^\n//;s/\\\n *\\//g' "$temp_dir/wip"\
     > "$outfile"
 
-  return 0
+  return $?
 }
 
 unfold_it() {
