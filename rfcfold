@@ -373,6 +373,10 @@ process_input() {
     infile=$temp_infile
   fi
 
+  if [[ ! -s "$infile" ]]; then
+    warn "infile '$infile' is empty."
+  fi
+
   if [[ "$col_gvn" -eq 1 ]] && [[ "$reversed" -eq 1 ]]; then
     warn "'-c' option ignored when unfolding (option '-r')."
   fi
