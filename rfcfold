@@ -130,7 +130,7 @@ fold_it_1() {
   fi
 
   # where to fold
-  foldcol=$(expr "$maxcol" - 1) # for the inserted '\' char
+  foldcol=$((maxcol - 1)) # for the inserted '\' char
 
   # ensure input file doesn't contain whitespace on the fold column
   grep -q "^\(.\{$foldcol\}\)\{1,\} " "$infile"
@@ -142,9 +142,9 @@ fold_it_1() {
   fi
 
   # center header text
-  length=$(expr ${#hdr_txt_1} + 2)
-  left_sp=$(expr \( "$maxcol" - "$length" \) / 2)
-  right_sp=$(expr "$maxcol" - "$length" - "$left_sp")
+  length=$((${#hdr_txt_1} + 2))
+  left_sp=$(( (maxcol - length) / 2 ))
+  right_sp=$((maxcol - length - left_sp))
   header=$(printf -- '%s %s %s' "$(equal_chars "$left_sp")" \
                      "$hdr_txt_1" "$(equal_chars "$right_sp")")
 
@@ -165,7 +165,7 @@ fold_it_1() {
 
 fold_it_2() {
   # where to fold
-  foldcol=$(expr "$maxcol" - 1) # for the inserted '\' char
+  foldcol=$((maxcol - 1)) # for the inserted '\' char
 
   # ensure input file doesn't contain the fold-sequence already
   if [[ -n "$("$SED" -n '/\\$/{
@@ -181,9 +181,9 @@ fold_it_2() {
   fi
 
   # center header text
-  length=$(expr ${#hdr_txt_2} + 2)
-  left_sp=$(expr \( "$maxcol" - "$length" \) / 2)
-  right_sp=$(expr "$maxcol" - "$length" - "$left_sp")
+  length=$((${#hdr_txt_2} + 2))
+  left_sp=$(( (maxcol - length) / 2))
+  right_sp=$((maxcol - length - left_sp))
   header=$(printf -- '%s %s %s' "$(equal_chars "$left_sp")" \
                      "$hdr_txt_2" "$(equal_chars "$right_sp")")
 
@@ -225,7 +225,7 @@ fold_it() {
   fi
 
   # check if file needs folding
-  testcol=$(expr "$maxcol" + 1)
+  testcol=$((maxcol + 1))
   grep -q ".\{$testcol\}" "$infile"
   if [[ $? -ne 0 ]]; then
     dbg "nothing to do; copying infile to outfile."
@@ -378,9 +378,9 @@ process_input() {
   fi
 
   if [[ "$strategy" -eq 0 ]] || [[ "$strategy" -eq 2 ]]; then
-    min_supported=$(expr ${#hdr_txt_2} + 8)
+    min_supported=$((${#hdr_txt_2} + 8))
   else
-    min_supported=$(expr ${#hdr_txt_1} + 8)
+    min_supported=$((${#hdr_txt_1} + 8))
   fi
   if [[ "$maxcol" -lt "$min_supported" ]]; then
     err "the folding column cannot be less than $min_supported."
