@@ -151,6 +151,7 @@ fold_it_1() {
   # generate outfile
   printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
+  # shellcheck disable=SC1004
   "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
 \2/;t M
     b
@@ -189,6 +190,7 @@ fold_it_2() {
   # generate outfile
   printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
+  # shellcheck disable=SC1004
   "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
 \\\2/;t M
     b
