@@ -286,7 +286,7 @@ unfold_it() {
   # check if file needs unfolding
   line=$(head -n 1 "$infile")
   line2=$("$SED" -n '2p' "$infile")
-  result=$(printf -- '%s\n' "$line" | fgrep "$hdr_txt_1")
+  result=$(printf -- '%s\n' "$line" | grep -F "$hdr_txt_1")
   if [[ $? -eq 0 ]]; then
     if [[ -n "$line2" ]]; then
       err "the second line in '$infile' is not empty."
@@ -295,7 +295,7 @@ unfold_it() {
     unfold_it_1
     return $?
   fi
-  result=$(printf -- '%s\n' "$line" | fgrep "$hdr_txt_2")
+  result=$(printf -- '%s\n' "$line" | grep -F "$hdr_txt_2")
   if [[ $? -eq 0 ]]; then
     if [[ -n "$line2" ]]; then
       err "the second line in '$infile' is not empty."
