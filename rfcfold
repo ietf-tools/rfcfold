@@ -82,9 +82,10 @@ prog_version='1.1.0'
 # functions for diagnostic messages
 prog_msg() {
   if [[ "$quiet" -eq 0 ]]; then
-    format_string="${prog_name}: $1: %s\n"
+    local severity
+    severity=$1
     shift
-    printf -- "$format_string" "$*" >&2
+    printf -- '%s: %s: %s\n' "$prog_name" "$severity" "$*" >&2
   fi
 }
 
