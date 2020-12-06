@@ -133,8 +133,7 @@ fold_it_1() {
   foldcol=$((maxcol - 1)) # for the inserted '\' char
 
   # ensure input file doesn't contain whitespace on the fold column
-  grep -q "^\(.\{$foldcol\}\)\{1,\} " "$infile"
-  if [[ $? -eq 0 ]]; then
+  if grep -q "^\(.\{$foldcol\}\)\{1,\} " "$infile"; then
     err "infile '$infile' has a space character occurring on the"\
         "folding column.  This file cannot be folded using the"\
         "'\\' strategy."
@@ -152,12 +151,11 @@ fold_it_1() {
   printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
   # shellcheck disable=SC1004
-  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
+  if ! "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
 \2/;t M
     b
     :M
-    P;D' < "$infile" >> "$outfile" 2> /dev/null
-  if [[ $? -ne 0 ]]; then
+    P;D' < "$infile" >> "$outfile" 2> /dev/null; then
     return 1
   fi
   return 0
@@ -191,12 +189,11 @@ fold_it_2() {
   printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
   # shellcheck disable=SC1004
-  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
+  if ! "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
 \\\2/;t M
     b
     :M
-    P;D' < "$infile" >> "$outfile" 2> /dev/null
-  if [[ $? -ne 0 ]]; then
+    P;D' < "$infile" >> "$outfile" 2> /dev/null; then
     return 1
   fi
   return 0
@@ -204,8 +201,7 @@ fold_it_2() {
 
 fold_it() {
   # ensure input file doesn't contain a tab
-  grep -q $'\t' "$infile"
-  if [[ $? -eq 0 ]]; then
+  if grep -q $'\t' "$infile"; then
     err "infile '$infile' contains a tab character, which is not"\
         "allowed."
     return 1
@@ -226,8 +222,7 @@ fold_it() {
 
   # check if file needs folding
   testcol=$((maxcol + 1))
-  grep -q ".\{$testcol\}" "$infile"
-  if [[ $? -ne 0 ]]; then
+  if ! grep -q ".\{$testcol\}" "$infile"; then
     dbg "nothing to do; copying infile to outfile."
     cp "$infile" "$outfile"
     return 255
@@ -286,8 +281,7 @@ unfold_it() {
   # check if file needs unfolding
   line=$(head -n 1 "$infile")
   line2=$("$SED" -n '2p' "$infile")
-  result=$(printf -- '%s\n' "$line" | grep -F "$hdr_txt_1")
-  if [[ $? -eq 0 ]]; then
+  if result=$(printf -- '%s\n' "$line" | grep -F "$hdr_txt_1"); then
     if [[ -n "$line2" ]]; then
       err "the second line in '$infile' is not empty."
       return 1
@@ -295,8 +289,7 @@ unfold_it() {
     unfold_it_1
     return $?
   fi
-  result=$(printf -- '%s\n' "$line" | grep -F "$hdr_txt_2")
-  if [[ $? -eq 0 ]]; then
+  if result=$(printf -- '%s\n' "$line" | grep -F "$hdr_txt_2"); then
     if [[ -n "$line2" ]]; then
       err "the second line in '$infile' is not empty."
       return 1
