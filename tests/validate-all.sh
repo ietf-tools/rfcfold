@@ -96,8 +96,8 @@ failed_test() {
 
 main() {
   printf 'starting tests for -h/--help options...'
-  ../rfcfold -h | grep -Fq 'Usage:' || failed_test
-  ../rfcfold --help | grep -Fq 'Usage:' || failed_test
+  ../rfcfold -h 2>/dev/null | grep -Fq 'Usage:' || failed_test
+  ../rfcfold --help 2>/dev/null | grep -Fq 'Usage:' || failed_test
   echo 'okay.'
   printf 'starting tests for -V/--version options...'
   ../rfcfold -V | grep -Eq 'version +[0-9]+\.[0-9]+\.[0-9]+' || failed_test
