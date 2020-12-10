@@ -365,7 +365,7 @@ process_input() {
   elif [[ ! -r "$infile" ]]; then
     err "specified infile '$infile' cannot be read."
     exit 1
-  elif [[ ! -f "$infile" ]]; then
+  elif [[ ! -f "$infile" ]] || [[ "$infile" == "/dev/stdin" ]]; then
     dbg "specified infile '$infile' is not a regular file."
     temp_infile=$(mktemp)
     dbg "writing infile to temporary file."
