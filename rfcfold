@@ -155,7 +155,8 @@ fold_it_1() {
 \2/;t M
     b
     :M
-    P;D' < "$infile" >> "$outfile" 2> /dev/null; then
+    P;D' < "$infile" >> "$outfile" 2> /dev/null
+  then
     return 1
   fi
   return 0
@@ -193,7 +194,8 @@ fold_it_2() {
 \\\2/;t M
     b
     :M
-    P;D' < "$infile" >> "$outfile" 2> /dev/null; then
+    P;D' < "$infile" >> "$outfile" 2> /dev/null
+  then
     return 1
   fi
   return 0
