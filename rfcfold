@@ -77,7 +77,7 @@ hdr_txt_1="NOTE: '\\' line wrapping per RFC 8792"
 hdr_txt_2="NOTE: '\\\\' line wrapping per RFC 8792"
 temp_dir=""
 prog_name='rfcfold'
-prog_version='1.1.0'
+prog_version='1.2.0'
 
 # functions for diagnostic messages
 prog_msg() {
