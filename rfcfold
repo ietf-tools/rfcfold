@@ -82,9 +82,10 @@ prog_version='1.2.0'
 # functions for diagnostic messages
 prog_msg() {
   if [[ "$quiet" -eq 0 ]]; then
-    format_string="${prog_name}: $1: %s\n"
+    local severity
+    severity=$1
     shift
-    printf -- "$format_string" "$*" >&2
+    printf -- '%s: %s: %s\n' "$prog_name" "$severity" "$*" >&2
   fi
 }
 
@@ -129,11 +130,10 @@ fold_it_1() {
   fi
 
   # where to fold
-  foldcol=$(expr "$maxcol" - 1) # for the inserted '\' char
+  foldcol=$((maxcol - 1)) # for the inserted '\' char
 
   # ensure input file doesn't contain whitespace on the fold column
-  grep -q "^\(.\{$foldcol\}\)\{1,\} " "$infile"
-  if [[ $? -eq 0 ]]; then
+  if grep -q "^\(.\{$foldcol\}\)\{1,\} " "$infile"; then
     err "infile '$infile' has a space character occurring on the"\
         "folding column.  This file cannot be folded using the"\
         "'\\' strategy."
@@ -141,21 +141,22 @@ fold_it_1() {
   fi
 
   # center header text
-  length=$(expr ${#hdr_txt_1} + 2)
-  left_sp=$(expr \( "$maxcol" - "$length" \) / 2)
-  right_sp=$(expr "$maxcol" - "$length" - "$left_sp")
+  length=$((${#hdr_txt_1} + 2))
+  left_sp=$(( (maxcol - length) / 2 ))
+  right_sp=$((maxcol - length - left_sp))
   header=$(printf -- '%s %s %s' "$(equal_chars "$left_sp")" \
                      "$hdr_txt_1" "$(equal_chars "$right_sp")")
 
   # generate outfile
   printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
-  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
+  # shellcheck disable=SC1004
+  if ! "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
 \2/;t M
     b
     :M
     P;D' < "$infile" >> "$outfile" 2> /dev/null
-  if [[ $? -ne 0 ]]; then
+  then
     return 1
   fi
   return 0
@@ -163,7 +164,7 @@ fold_it_1() {
 
 fold_it_2() {
   # where to fold
-  foldcol=$(expr "$maxcol" - 1) # for the inserted '\' char
+  foldcol=$((maxcol - 1)) # for the inserted '\' char
 
   # ensure input file doesn't contain the fold-sequence already
   if [[ -n "$("$SED" -n '/\\$/{
@@ -179,21 +180,22 @@ fold_it_2() {
   fi
 
   # center header text
-  length=$(expr ${#hdr_txt_2} + 2)
-  left_sp=$(expr \( "$maxcol" - "$length" \) / 2)
-  right_sp=$(expr "$maxcol" - "$length" - "$left_sp")
+  length=$((${#hdr_txt_2} + 2))
+  left_sp=$(( (maxcol - length) / 2))
+  right_sp=$((maxcol - length - left_sp))
   header=$(printf -- '%s %s %s' "$(equal_chars "$left_sp")" \
                      "$hdr_txt_2" "$(equal_chars "$right_sp")")
 
   # generate outfile
   printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
-  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
+  # shellcheck disable=SC1004
+  if ! "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
 \\\2/;t M
     b
     :M
     P;D' < "$infile" >> "$outfile" 2> /dev/null
-  if [[ $? -ne 0 ]]; then
+  then
     return 1
   fi
   return 0
@@ -201,8 +203,7 @@ fold_it_2() {
 
 fold_it() {
   # ensure input file doesn't contain a tab
-  grep -q $'\t' "$infile"
-  if [[ $? -eq 0 ]]; then
+  if grep -q $'\t' "$infile"; then
     err "infile '$infile' contains a tab character, which is not"\
         "allowed."
     return 1
@@ -222,9 +223,8 @@ fold_it() {
   fi
 
   # check if file needs folding
-  testcol=$(expr "$maxcol" + 1)
-  grep -q ".\{$testcol\}" "$infile"
-  if [[ $? -ne 0 ]]; then
+  testcol=$((maxcol + 1))
+  if ! grep -q ".\{$testcol\}" "$infile"; then
     dbg "nothing to do; copying infile to outfile."
     cp "$infile" "$outfile"
     return 255
@@ -283,8 +283,7 @@ unfold_it() {
   # check if file needs unfolding
   line=$(head -n 1 "$infile")
   line2=$("$SED" -n '2p' "$infile")
-  result=$(printf -- '%s\n' "$line" | fgrep "$hdr_txt_1")
-  if [[ $? -eq 0 ]]; then
+  if result=$(printf -- '%s\n' "$line" | grep -F "$hdr_txt_1"); then
     if [[ -n "$line2" ]]; then
       err "the second line in '$infile' is not empty."
       return 1
@@ -292,8 +291,7 @@ unfold_it() {
     unfold_it_1
     return $?
   fi
-  result=$(printf -- '%s\n' "$line" | fgrep "$hdr_txt_2")
-  if [[ $? -eq 0 ]]; then
+  if result=$(printf -- '%s\n' "$line" | grep -F "$hdr_txt_2"); then
     if [[ -n "$line2" ]]; then
       err "the second line in '$infile' is not empty."
       return 1
@@ -375,9 +373,9 @@ process_input() {
   fi
 
   if [[ "$strategy" -eq 0 ]] || [[ "$strategy" -eq 2 ]]; then
-    min_supported=$(expr ${#hdr_txt_2} + 8)
+    min_supported=$((${#hdr_txt_2} + 8))
   else
-    min_supported=$(expr ${#hdr_txt_1} + 8)
+    min_supported=$((${#hdr_txt_1} + 8))
   fi
   if [[ "$maxcol" -lt "$min_supported" ]]; then
     err "the folding column cannot be less than $min_supported."
