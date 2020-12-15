@@ -352,6 +352,10 @@ process_input() {
     shift
   done
 
+  dbg "$prog_name $prog_version using interpreter $BASH" \
+      "version $BASH_VERSION on ${BASH_VERSINFO[5]}"
+  dbg "sed binary: $(type "$SED")"
+
   if [[ -z "$infile" ]]; then
     err "infile parameter missing (use -h for help)."
     exit 1
