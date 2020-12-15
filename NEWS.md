@@ -15,6 +15,11 @@
 * Removal of arbitrary upper limit for folding column.  The practical upper
   limit is determined by the available `grep` and `sed` implementations.
 
+## Version 1.0.1 (2020-06-27)
+
+* Improve portability by replacing problematic use of `echo` with `printf`.
+  This makes `rfcfold` compatible with the Z shell (`zsh`).
+
 ## Version 1.0.0 (2020-06-20)
 
 * Initial release to [GitHub](https://github.com/ietf-tools/rfcfold)
