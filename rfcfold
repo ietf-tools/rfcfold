@@ -1,7 +1,6 @@
 #!/bin/bash --posix
 
 # This script may need some adjustments to work on a given system.
-# For instance, the utility 'gsed' may need to be installed.
 # Also, please be advised that 'bash' (not 'sh') must be used.
 
 # Copyright (c) 2020 IETF Trust, Kent Watsen, and Erik Auerswald.
