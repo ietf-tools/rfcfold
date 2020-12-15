@@ -1,6 +1,10 @@
 # Noteworthy Changes in rfcfold Releases
 
-## Upcoming Version
+## Version 1.2.1 (2020-12-15)
+
+* Update NEWS.md file with current information.
+
+## Version 1.2.0 (2020-12-15)
 
 * More reliable reporting of folding errors.
 
