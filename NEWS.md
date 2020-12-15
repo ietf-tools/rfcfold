@@ -10,12 +10,12 @@
 
 * Add a NEWS.md file to list noteworthy changes in released versions.
 
-## Version 1.1.0
+## Version 1.1.0 (2020-07-06)
 
 * Removal of arbitrary upper limit for folding column.  The practical upper
   limit is determined by the available `grep` and `sed` implementations.
 
-## Version 1.0.0
+## Version 1.0.0 (2020-06-20)
 
 * Initial release to [GitHub](https://github.com/ietf-tools/rfcfold)
   after publication of [RFC 8792](https://www.rfc-editor.org/info/rfc8792).
