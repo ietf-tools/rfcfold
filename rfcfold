@@ -150,14 +150,12 @@ fold_it_1() {
   printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
   # shellcheck disable=SC1004
-  if ! "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
+  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
 \2/;t M
     b
     :M
-    P;D' < "$infile" >> "$outfile" 2> /dev/null
-  then
-    return 1
-  fi
+    P;D' < "$infile" >> "$outfile" 2> /dev/null \
+  || return 1
   return 0
 }
 
@@ -189,14 +187,12 @@ fold_it_2() {
   printf -- '%s\n' "$header" > "$outfile"
   echo "" >> "$outfile"
   # shellcheck disable=SC1004
-  if ! "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
+  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
 \\\2/;t M
     b
     :M
-    P;D' < "$infile" >> "$outfile" 2> /dev/null
-  then
-    return 1
-  fi
+    P;D' < "$infile" >> "$outfile" 2> /dev/null \
+  || return 1
   return 0
 }
 
@@ -259,9 +255,9 @@ unfold_it_1() {
   # unfold wip file
   "$SED" '{
       H;$!d
-    };x;s/^\n//;s/\\\n *//g' "$temp_dir/wip" > "$outfile"
-
-  return $?
+    };x;s/^\n//;s/\\\n *//g' "$temp_dir/wip" > "$outfile" \
+  || return 1
+  return 0
 }
 
 unfold_it_2() {
@@ -273,9 +269,9 @@ unfold_it_2() {
   # unfold wip file
   "$SED" '{
       H;$!d
-    };x;s/^\n//;s/\\\n *\\//g' "$temp_dir/wip" > "$outfile"
-
-  return $?
+    };x;s/^\n//;s/\\\n *\\//g' "$temp_dir/wip" > "$outfile" \
+  || return 1
+  return 0
 }
 
 unfold_it() {
