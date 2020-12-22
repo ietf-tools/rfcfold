@@ -1,5 +1,12 @@
 # Noteworthy Changes in rfcfold Releases
 
+## Upcoming Version
+
+* Prefer [GNU grep](https://www.gnu.org/software/grep/) installed as `ggrep`
+  over the grep included in the operating system, if available.  On some
+  systems, e.g. macOS, this may increase the maximum folding column value for
+  `rfcfold`, if combined with using GNU sed (e.g, as `gsed`).
+
 ## Version 1.2.1 (2020-12-15)
 
 * Update NEWS.md file with current information.
