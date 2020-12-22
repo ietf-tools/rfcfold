@@ -102,7 +102,7 @@ dbg() {
   fi
 }
 
-# determine name of [g]sed binary
+# prefer gsed (GNU sed) over the system's default sed
 type gsed > /dev/null 2>&1 && SED=gsed || SED=sed
 
 cleanup() {
