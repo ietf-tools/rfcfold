@@ -94,6 +94,15 @@ failed_test() {
 }
 
 
+have_gnu_grep_sed() {
+  local GREP SED
+  type ggrep > /dev/null 2>&1 && GREP=ggrep || GREP=grep
+  type gsed > /dev/null 2>&1 && SED=gsed || SED=sed
+  "$GREP" --version | grep -q GNU && "$SED" --version | grep -q GNU && return 0
+  return 1
+}
+
+
 main() {
   printf 'starting tests for -h/--help options...'
   ../rfcfold -h 2>/dev/null | grep -Fq 'Usage:' || failed_test
@@ -198,6 +207,14 @@ main() {
   # - GNU imposes a limit of 32767                     --> -c <= 32766
   # - PCRE imposes a limit of 65535                    --> -c <= 65534
   test_file 1 example-2.txt            1   x 16777216
+  if have_gnu_grep_sed; then
+    test_file 1 example-2.txt            0   0 279
+    test_file 2 example-2.txt            0   0 279
+    test_file 1 example-2.txt          255 255 280
+    test_file 2 example-2.txt          255 255 280
+  else
+    echo "skipping tests with folding columns 279 and 280."
+  fi
   echo
   printf "testing unfolding of smart folding examples 3.1 and 3.2..."
   expected_exit_code=0
@@ -213,7 +230,7 @@ main() {
   echo "verifying that rfcfold itself needs no folding..."
   test_file 0 ../rfcfold             255
   echo
-  echo "all tests passed."
+  echo "all tests passed (or skipped)."
 }
 
 main "$@"
