@@ -6,11 +6,11 @@ script that folds or unfolds a text file according to
 *Handling Long Lines in Content of Internet-Drafts and RFCs*.
 The (un)folding operations are implemented with `grep` and `sed`.
 
-## Usage
+## rfcfold Usage
 
 Invoking `rfcfold` with the `-h` option shows usage information.
 
-## `grep` and `sed`
+## grep and sed
 
 Usage of both
 [grep](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/grep.html)
