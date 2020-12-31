@@ -102,8 +102,10 @@ dbg() {
   fi
 }
 
-# determine name of [g]sed binary
+# prefer gsed (GNU sed) over the system's default sed
 type gsed > /dev/null 2>&1 && SED=gsed || SED=sed
+# prefer ggrep (GNU grep) over the system's default grep
+type ggrep > /dev/null 2>&1 && GREP=ggrep || GREP=grep
 
 cleanup() {
   rm -rf "$temp_dir"
@@ -132,7 +134,7 @@ fold_it_1() {
   foldcol=$((maxcol - 1)) # for the inserted '\' char
 
   # ensure input file doesn't contain whitespace on the fold column
-  if grep -q "^\(.\{$foldcol\}\)\{1,\} " "$infile"; then
+  if "$GREP" -q "^\(.\{$foldcol\}\)\{1,\} " "$infile"; then
     err "infile '$infile' has a space character occurring on the"\
         "folding column.  This file cannot be folded using the"\
         "'\\' strategy."
@@ -198,7 +200,7 @@ fold_it_2() {
 
 fold_it() {
   # ensure input file doesn't contain a tab
-  if grep -q $'\t' "$infile"; then
+  if "$GREP" -q $'\t' "$infile"; then
     err "infile '$infile' contains a tab character, which is not"\
         "allowed."
     return 1
@@ -219,7 +221,7 @@ fold_it() {
 
   # check if file needs folding
   testcol=$((maxcol + 1))
-  if ! grep -q ".\{$testcol\}" "$infile"; then
+  if ! "$GREP" -q ".\{$testcol\}" "$infile"; then
     dbg "nothing to do; copying infile to outfile."
     cp "$infile" "$outfile"
     return 255
@@ -278,7 +280,8 @@ unfold_it() {
   # check if file needs unfolding
   line=$(head -n 1 "$infile")
   line2=$("$SED" -n '2p' "$infile")
-  if result=$(printf -- '%s\n' "$line" | grep -F "$hdr_txt_1"); then
+  if result=$(printf -- '%s\n' "$line" | "$GREP" -F "$hdr_txt_1")
+  then
     if [[ -n "$line2" ]]; then
       err "the second line in '$infile' is not empty."
       return 1
@@ -286,7 +289,8 @@ unfold_it() {
     unfold_it_1
     return $?
   fi
-  if result=$(printf -- '%s\n' "$line" | grep -F "$hdr_txt_2"); then
+  if result=$(printf -- '%s\n' "$line" | "$GREP" -F "$hdr_txt_2")
+  then
     if [[ -n "$line2" ]]; then
       err "the second line in '$infile' is not empty."
       return 1
@@ -351,6 +355,7 @@ process_input() {
   dbg "$prog_name $prog_version using interpreter $BASH" \
       "version $BASH_VERSION on ${BASH_VERSINFO[5]}"
   dbg "sed binary: $(type "$SED")"
+  dbg "grep binary: $(type "$GREP")"
 
   if [[ -z "$infile" ]]; then
     err "infile parameter missing (use -h for help)."
@@ -382,7 +387,7 @@ process_input() {
   fi
   dbg "testing grep support for folding column value '$maxcol'..."
   # testcol == maxcol + 1
-  echo a | grep -q "a\{1,$((maxcol+1))\}" || {
+  echo a | "$GREP" -q "a\{1,$((maxcol+1))\}" || {
     err "folding column '$maxcol' is too big for grep."
     exit 1
   }
