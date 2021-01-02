@@ -2,6 +2,9 @@
 
 ## Upcoming Version
 
+* Use a POSIX compatible method to detect ASCII control or non-ASCII characters
+  in an input file for folding.
+
 * Prefer [GNU grep](https://www.gnu.org/software/grep/) installed as `ggrep`
   over the grep included in the operating system, if available.  On some
   systems, e.g. macOS, this may increase the maximum folding column value for

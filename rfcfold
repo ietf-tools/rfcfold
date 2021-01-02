@@ -208,16 +208,13 @@ fold_it() {
 
   # folding of input containing ASCII control or non-ASCII characters
   # may result in a wrong folding column and is not supported
-  if type gawk > /dev/null 2>&1; then
-    env LC_ALL=C gawk '/[\000-\014\016-\037\177]/{exit 1}' "$infile"\
-    || warn "infile '$infile' contains ASCII control characters"\
+  od -An -tx1 "$infile" | \
+    "$GREP" -Eq '0[0-9]|0[BCEFbcef]|1[0-9A-Fa-f]|7[Ff]' \
+    && warn "infile '$infile' contains ASCII control characters" \
             "(unsupported)."
-    env LC_ALL=C gawk '/[^\000-\177]/{exit 1}' "$infile"\
-    || warn "infile '$infile' contains non-ASCII characters"\
+  od -An -tx1 "$infile" | "$GREP" -q '[89A-Fa-f][0-9A-Fa-f]' \
+    && warn "infile '$infile' contains non-ASCII characters" \
             "(unsupported)."
-  else
-    dbg "no GNU awk; skipping checks for special characters."
-  fi
 
   # check if file needs folding
   testcol=$((maxcol + 1))

@@ -87,12 +87,23 @@ test_prefolded_file() {
   rm $2.unfolded
 }
 
-
 failed_test() {
   echo 'failed.'
   exit 1
 }
 
+test_folding_emits_warning() {
+  # $1 : is the file to test
+  # $2 : is the extended regular expression to check
+  printf -- 'testing that folding %s emits a warning...' "$1"
+  if ../rfcfold -i "$1" -o "$1.folded" 2>&1 | grep -Eq "$2"; then
+    rm "$1.folded"
+    echo okay.
+  else
+    rm -f "$1.folded"
+    failed_test
+  fi
+}
 
 have_gnu_grep_sed() {
   local GREP SED
@@ -215,6 +226,11 @@ main() {
   else
     echo "skipping tests with folding columns 279 and 280."
   fi
+  echo
+  echo "starting warning tests..."
+  test_folding_emits_warning contains-formfeed.txt 'Warning:.*ASCII control'
+  test_folding_emits_warning contains-del.txt 'Warning:.*ASCII control'
+  test_folding_emits_warning contains-utf8.txt 'Warning:.*non-ASCII'
   echo
   printf "testing unfolding of smart folding examples 3.1 and 3.2..."
   expected_exit_code=0
