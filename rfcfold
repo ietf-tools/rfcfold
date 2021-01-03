@@ -351,6 +351,7 @@ process_input() {
 
   dbg "$prog_name $prog_version using interpreter $BASH" \
       "version $BASH_VERSION on ${BASH_VERSINFO[5]}"
+  dbg "Bash options: $BASHOPTS"
   dbg "sed binary: $(type "$SED")"
   dbg "grep binary: $(type "$GREP")"
 
@@ -403,6 +404,10 @@ main() {
   fi
 
   process_input "$@"
+
+  dbg "infile='$infile', outfile='$outfile'"
+  dbg "strategy='$strategy', reversed='$reversed'," \
+      "maxcol='$maxcol', col_gvn='$col_gvn'"
 
   [[ ! -s "$infile" ]] && warn "input file '$infile' is empty"
 
