@@ -8,9 +8,9 @@ run_cmd() {
   exit_code=$?
   if [[ $exit_code -ne $2 ]]; then
     printf "failed.\n"
-    printf "  - exit code: $exit_code (expected $2)\n"
-    printf "  - command: $1\n"
-    printf "  - output: $output\n\n"
+    printf "  - exit code: %d (expected %d)\n" "$exit_code" "$2"
+    printf "  - command: %s\n" "$1"
+    printf "  - output: %s\n\n" "$output"
     exit
   fi
 }
