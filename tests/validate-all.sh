@@ -231,6 +231,7 @@ main() {
   test_folding_emits_warning contains-formfeed.txt 'Warning:.*ASCII control'
   test_folding_emits_warning contains-del.txt 'Warning:.*ASCII control'
   test_folding_emits_warning contains-utf8.txt 'Warning:.*non-ASCII'
+  test_folding_emits_warning empty-file 'Warning:.*is empty'
   echo
   printf "testing unfolding of smart folding examples 3.1 and 3.2..."
   expected_exit_code=0

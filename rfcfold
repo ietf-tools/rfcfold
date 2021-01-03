@@ -404,6 +404,8 @@ main() {
 
   process_input "$@"
 
+  [[ ! -s "$infile" ]] && warn "input file '$infile' is empty"
+
   if [[ "$reversed" -eq 0 ]]; then
     fold_it
     code=$?
