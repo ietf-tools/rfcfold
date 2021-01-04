@@ -103,9 +103,9 @@ dbg() {
 }
 
 # prefer gsed (GNU sed) over the system's default sed
-type gsed > /dev/null 2>&1 && SED=gsed || SED=sed
+type gsed > /dev/null 2>&1 && SED='gsed' || SED='sed'
 # prefer ggrep (GNU grep) over the system's default grep
-type ggrep > /dev/null 2>&1 && GREP=ggrep || GREP=grep
+type ggrep > /dev/null 2>&1 && GREP='ggrep' || GREP='grep'
 
 cleanup() {
   rm -rf "$temp_dir"
