@@ -113,6 +113,11 @@ have_gnu_grep_sed() {
   return 1
 }
 
+have_shellcheck() {
+  type shellcheck >/dev/null 2>&1 && return 0
+  return 1
+}
+
 
 main() {
   printf 'starting tests for -h/--help options...'
@@ -246,6 +251,14 @@ main() {
   echo
   echo "verifying that rfcfold itself needs no folding..."
   test_file 0 ../rfcfold             255
+  echo
+  if have_shellcheck; then
+    printf "verifying that ShellCheck accepts rfcfold without warnings..."
+    shellcheck ../rfcfold || { shellcheck --version; failed_test; }
+    echo "okay."
+  else
+    echo "skipping ShellCheck test ('shellcheck' not found)."
+  fi
   echo
   echo "all tests passed (or skipped)."
 }
