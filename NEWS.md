@@ -2,6 +2,12 @@
 
 ## Upcoming Version
 
+* Support using a *non-regular* file, e.g., a pipe, as input file.
+  This allows the use of `rfcfold` as any part of a pipeline by using
+  `/dev/stdin` as input filename and `/dev/stdout` as output filename.
+  Both `/dev/stdin` and `/dev/stdout` are provided by Bash if the
+  operating system does not provide them itself.
+
 * Use a POSIX compatible method to detect ASCII control or non-ASCII characters
   in an input file for folding.
 

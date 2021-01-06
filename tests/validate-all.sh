@@ -3,13 +3,24 @@
 run_cmd() {
   # $1 is the cmd to run
   # $2 is the expected error code
+  # $3 is unset or the keyword 'stdin' for reading data from standard input
+  # $4 is unset or the file to read from standard input
 
-  output=`$1 2>&1`
-  exit_code=$?
+  if [[ -z "$3" ]]; then
+    output=$($1 2>&1)
+    exit_code=$?
+  elif [[ -n "$3" ]] && [[ "$3" == 'stdin' ]] && [[ -n "$4" ]]; then
+    # using 'cat' forces reading input from a pipe; '<' does not
+    output=$(cat -- "$4" | $1 2>&1)
+    exit_code=$?
+  fi
   if [[ $exit_code -ne $2 ]]; then
     printf "failed.\n"
     printf "  - exit code: %d (expected %d)\n" "$exit_code" "$2"
     printf "  - command: %s\n" "$1"
+    if [[ -n "$3" ]] && [[ "$3" == 'stdin' ]] && [[ -n "$4" ]]; then
+      printf -- '  - reading file "%s" from STDIN\n' "$4"
+    fi
     printf "  - output: %s\n\n" "$output"
     exit
   fi
@@ -26,11 +37,20 @@ test_file() {
 
   if [ -z "$5" ]; then
     command="../rfcfold -s $1 -d -i $2 -o $2.folded"
-  else
+  elif [ -z "$6" ]; then
     command="../rfcfold -s $1 -d -c $5 -i $2 -o $2.folded"
+  elif [ "$6" = 'stdin' ]; then
+    command="../rfcfold -s $1 -d -c $5 -i /dev/stdin -o $2.folded"
+  else
+    echo "test framework error."
+    return
   fi
   expected_exit_code=$3
-  run_cmd "$command" $expected_exit_code
+  if [ -n "$5" ] && [ -n "$6" ] && [ "$6" = 'stdin' ]; then
+    run_cmd "$command" $expected_exit_code stdin "$2"
+  else
+    run_cmd "$command" $expected_exit_code
+  fi
   if [ $expected_exit_code -ne 0 ]; then
     printf "okay.\n"
     if [ $expected_exit_code -eq 255 ]; then
@@ -237,6 +257,25 @@ main() {
   test_folding_emits_warning contains-del.txt 'Warning:.*ASCII control'
   test_folding_emits_warning contains-utf8.txt 'Warning:.*non-ASCII'
   test_folding_emits_warning empty-file 'Warning:.*is empty'
+  echo
+  echo "starting tests that read via pipe from standard input..."
+  test_file 0 contains-tab.txt         1   x  69 stdin
+  test_file 0 example-1.txt            0   0  69 stdin
+  test_file 0 example-2.txt            0   0  69 stdin
+  test_file 0 example-3.txt            0   0  69 stdin
+  test_file 0 only-2-can-fold-it-1.txt 0   0  69 stdin
+  test_file 1 contains-tab.txt         1   x  69 stdin
+  test_file 1 already-exists.txt       1   x  69 stdin
+  test_file 1 folding-needed.txt       0   0  69 stdin
+  test_file 1 nofold-needed.txt      255 255  69 stdin
+  test_file 1 nofold-needed.txt        1   x  67 stdin
+  test_file 1 nofold-needed-again.txt  0   0  67 stdin
+  test_file 2 contains-tab.txt         1   x  69 stdin
+  test_file 2 already-exists.txt       1   x  69 stdin
+  test_file 2 folding-needed.txt       0   0  69 stdin
+  test_file 2 nofold-needed.txt      255 255  69 stdin
+  test_file 2 nofold-needed.txt        1   x  67 stdin
+  test_file 2 nofold-needed-again.txt  0   0  67 stdin
   echo
   printf "testing unfolding of smart folding examples 3.1 and 3.2..."
   expected_exit_code=0
