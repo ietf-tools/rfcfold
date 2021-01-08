@@ -381,8 +381,13 @@ process_input() {
     dbg "specified infile '$infile' is a regular file."
   fi
 
-  if [[ "$col_gvn" -eq 1 ]] && [[ "$reversed" -eq 1 ]]; then
-    warn "'-c' option ignored when unfolding (option '-r')."
+  if [[ "$reversed" -eq 1 ]]; then
+    if [[ "$col_gvn" -eq 1 ]]; then
+      warn "'-c' option ignored when unfolding (option '-r')."
+    fi
+    if [[ "$strategy" -ne 0 ]]; then
+      warn "'-s' option ignored when unfolding (option '-r')."
+    fi
   fi
 
   if [[ "$strategy" -eq 0 ]] || [[ "$strategy" -eq 2 ]]; then
