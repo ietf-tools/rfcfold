@@ -150,14 +150,13 @@ fold_it_1() {
                      "$hdr_txt_1" "$(equal_chars "$right_sp")")
 
   # generate outfile
-  printf -- '%s\n' "$header" > "$outfile"
-  echo "" >> "$outfile"
+  printf -- '%s\n\n' "$header" > "$outfile"
   # shellcheck disable=SC1004
   "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
 \2/;t M
     b
     :M
-    P;D' < "$infile" >> "$outfile" \
+    P;D' "$infile" >> "$outfile" \
   || return 1
   return 0
 }
@@ -174,8 +173,7 @@ fold_it_2() {
                      "$hdr_txt_2" "$(equal_chars "$right_sp")")
 
   # generate outfile
-  printf -- '%s\n' "$header" > "$outfile"
-  echo "" >> "$outfile"
+  printf -- '%s\n\n' "$header" > "$outfile"
   # shellcheck disable=SC1004
   "$SED" '{
       H;$!d
