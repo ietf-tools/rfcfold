@@ -2,6 +2,8 @@
 
 ## Upcoming Version
 
+* Add *forced-folding* to strategy 2.
+
 * Support using a *non-regular* file, e.g., a pipe, as input file.
   This allows the use of `rfcfold` as any part of a pipeline by using
   `/dev/stdin` as input filename and `/dev/stdout` as output filename.
