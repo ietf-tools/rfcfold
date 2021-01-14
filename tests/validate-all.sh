@@ -7,11 +7,11 @@ run_cmd() {
   # $4 is unset or the file to read from standard input
 
   if [[ -z "$3" ]]; then
-    output=$($1 2>&1)
+    output=$(eval $1 2>&1)
     exit_code=$?
   elif [[ -n "$3" ]] && [[ "$3" == 'stdin' ]] && [[ -n "$4" ]]; then
     # using 'cat' forces reading input from a pipe; '<' does not
-    output=$(cat -- "$4" | $1 2>&1)
+    output=$(cat -- "$4" | eval $1 2>&1)
     exit_code=$?
   fi
   if [[ $exit_code -ne $2 ]]; then
@@ -36,11 +36,11 @@ test_file() {
   printf "testing $2..."
 
   if [ -z "$5" ]; then
-    command="../rfcfold -s $1 -d -i $2 -o $2.folded"
+    command="../rfcfold -s $1 -d -i \"$2\" -o \"$2.folded\""
   elif [ -z "$6" ]; then
-    command="../rfcfold -s $1 -d -c $5 -i $2 -o $2.folded"
+    command="../rfcfold -s $1 -d -c $5 -i \"$2\" -o \"$2.folded\""
   elif [ "$6" = 'stdin' ]; then
-    command="../rfcfold -s $1 -d -c $5 -i /dev/stdin -o $2.folded"
+    command="../rfcfold -s $1 -d -c $5 -i /dev/stdin -o \"$2.folded\""
   else
     echo "test framework error."
     return
@@ -54,21 +54,21 @@ test_file() {
   if [ $expected_exit_code -ne 0 ]; then
     printf "okay.\n"
     if [ $expected_exit_code -eq 255 ]; then
-      rm -- $2.folded*
+      rm -- "$2".folded*
     fi
     return
   fi
 
-  command="../rfcfold -d -r -i $2.folded -o $2.folded.unfolded"
+  command="../rfcfold -d -r -i \"$2.folded\" -o \"$2.folded.unfolded\""
   expected_exit_code=$4
   run_cmd "$command" $expected_exit_code
 
-  command="diff -q -- $2 $2.folded.unfolded"
+  command="diff -q -- \"$2\" \"$2.folded.unfolded\""
   expected_exit_code=0
   run_cmd "$command" $expected_exit_code
 
   printf "okay.\n"
-  rm -- $2.folded*
+  rm -- "$2".folded*
 }
 
 test_unfoldable_file() {
@@ -78,13 +78,13 @@ test_unfoldable_file() {
 
   printf "testing $2..."
 
-  command="../rfcfold -d -r -i $2 -o $2.unfolded"
+  command="../rfcfold -d -r -i \"$2\" -o \"$2.unfolded\""
   expected_exit_code=$3
   run_cmd "$command" $expected_exit_code
 
   printf "okay.\n"
   if [[ $3 -eq 255 ]]; then
-    rm -- $2.unfolded
+    rm -- "$2".unfolded
   fi
 }
 
@@ -95,16 +95,16 @@ test_prefolded_file() {
 
   printf "testing $2..."
 
-  command="../rfcfold -d -r -i $2 -o $2.unfolded"
+  command="../rfcfold -d -r -i \"$2\" -o \"$2.unfolded\""
   expected_exit_code=0
   run_cmd "$command" $expected_exit_code
 
-  command="diff -q -- $3 $2.unfolded"
+  command="diff -q -- \"$3\" \"$2.unfolded\""
   expected_exit_code=0
   run_cmd "$command" $expected_exit_code
 
   printf "okay.\n"
-  rm -- $2.unfolded
+  rm -- "$2.unfolded"
 }
 
 failed_test() {
@@ -268,6 +268,12 @@ main() {
   test_file 0 -example-1.txt         255 255  73
   test_prefolded_file 1 -unfold-s1.txt -example-1.txt
   test_prefolded_file 2 -unfold-s2.txt -example-1.txt
+  test_file 0 "name with spaces.txt"   0   0
+  test_file 1 "name with spaces.txt"   0   0
+  test_file 2 "name with spaces.txt"   0   0
+  test_file 0 "name with spaces.txt" 255 255  73
+  test_prefolded_file 1 "unfold strategy 1.txt" "name with spaces.txt"
+  test_prefolded_file 2 "unfold strategy 2.txt" "name with spaces.txt"
   echo
   echo "starting tests that read via pipe from standard input..."
   test_file 0 contains-tab.txt         1   x  69 stdin
