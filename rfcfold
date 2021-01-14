@@ -109,7 +109,7 @@ type gsed > /dev/null 2>&1 && SED='gsed' || SED='sed'
 type ggrep > /dev/null 2>&1 && GREP='ggrep' || GREP='grep'
 
 cleanup() {
-  rm -rf "$temp_dir" "$temp_infile"
+  rm -rf -- "$temp_dir" "$temp_infile"
 }
 trap 'cleanup' EXIT
 
@@ -123,7 +123,7 @@ equal_chars() {
 
 fold_it_1() {
   # ensure input file doesn't contain the fold-sequence already
-  if [[ -n "$("$SED" -n '/\\$/p' "$infile")" ]]; then
+  if [[ -n "$("$SED" -n -- '/\\$/p' "$infile")" ]]; then
     err "infile '$infile' has a line ending with a '\\' character."\
         "This script cannot fold this file using the '\\' strategy"\
         "without there being false positives produced in the"\
@@ -135,7 +135,7 @@ fold_it_1() {
   foldcol=$((maxcol - 1)) # for the inserted '\' char
 
   # ensure input file doesn't contain whitespace on the fold column
-  if "$GREP" -q "^\(.\{$foldcol\}\)\{1,\} " "$infile"; then
+  if "$GREP" -q -- "^\(.\{$foldcol\}\)\{1,\} " "$infile"; then
     err "infile '$infile' has a space character occurring on the"\
         "folding column.  This file cannot be folded using the"\
         "'\\' strategy."
@@ -152,7 +152,7 @@ fold_it_1() {
   # generate outfile
   printf -- '%s\n\n' "$header" > "$outfile"
   # shellcheck disable=SC1004
-  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
+  "$SED" -- 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
 \2/;t M
     b
     :M
@@ -175,7 +175,7 @@ fold_it_2() {
   # generate outfile
   printf -- '%s\n\n' "$header" > "$outfile"
   # shellcheck disable=SC1004
-  "$SED" '{
+  "$SED" -- '{
       H;$!d
     };x;s/^\n//;s/\\\(\n *\\\)/\\\\\
 \\\1/g' "$infile" | \
@@ -190,7 +190,7 @@ fold_it_2() {
 
 fold_it() {
   # ensure input file doesn't contain a tab
-  if "$GREP" -q $'\t' "$infile"; then
+  if "$GREP" -q -- $'\t' "$infile"; then
     err "infile '$infile' contains a tab character, which is not"\
         "allowed."
     return 1
@@ -198,19 +198,19 @@ fold_it() {
 
   # folding of input containing ASCII control or non-ASCII characters
   # may result in a wrong folding column and is not supported
-  od -An -tx1 "$infile" | \
+  od -An -tx1 -- "$infile" | \
     "$GREP" -Eq '0[0-9]|0[BCEFbcef]|1[0-9A-Fa-f]|7[Ff]' \
     && warn "infile '$infile' contains ASCII control characters" \
             "(unsupported)."
-  od -An -tx1 "$infile" | "$GREP" -q '[89A-Fa-f][0-9A-Fa-f]' \
+  od -An -tx1 -- "$infile" | "$GREP" -q '[89A-Fa-f][0-9A-Fa-f]' \
     && warn "infile '$infile' contains non-ASCII characters" \
             "(unsupported)."
 
   # check if file needs folding
   testcol=$((maxcol + 1))
-  if ! "$GREP" -q ".\{$testcol\}" "$infile"; then
+  if ! "$GREP" -q -- ".\{$testcol\}" "$infile"; then
     dbg "nothing to do; copying infile to outfile."
-    cp "$infile" "$outfile"
+    cp -- "$infile" "$outfile"
     return 255
   fi
 
@@ -239,10 +239,10 @@ unfold_it_1() {
   temp_dir=$(mktemp -d)
 
   # output all but the first two lines (the header) to wip file
-  awk "NR>2" "$infile" > "$temp_dir/wip"
+  awk -- "NR>2" "$infile" > "$temp_dir/wip"
 
   # unfold wip file
-  "$SED" '{
+  "$SED" -- '{
       H;$!d
     };x;s/^\n//;s/\\\n *//g' "$temp_dir/wip" > "$outfile" \
   || return 1
@@ -253,10 +253,10 @@ unfold_it_2() {
   temp_dir=$(mktemp -d)
 
   # output all but the first two lines (the header) to wip file
-  awk "NR>2" "$infile" > "$temp_dir/wip"
+  awk -- "NR>2" "$infile" > "$temp_dir/wip"
 
   # unfold wip file
-  "$SED" '{
+  "$SED" -- '{
       H;$!d
     };x;s/^\n//;s/\\\n *\\//g' "$temp_dir/wip" > "$outfile" \
   || return 1
@@ -265,8 +265,8 @@ unfold_it_2() {
 
 unfold_it() {
   # check if file needs unfolding
-  line=$(head -n 1 "$infile")
-  line2=$("$SED" -n '2p' "$infile")
+  line=$(head -n 1 -- "$infile")
+  line2=$("$SED" -n -- '2p' "$infile")
   if result=$(printf -- '%s\n' "$line" | "$GREP" -F "$hdr_txt_1")
   then
     if [[ -n "$line2" ]]; then
@@ -286,7 +286,7 @@ unfold_it() {
     return $?
   fi
   dbg "nothing to do; copying infile to outfile."
-  cp "$infile" "$outfile"
+  cp -- "$infile" "$outfile"
   return 255
 }
 
@@ -364,7 +364,7 @@ process_input() {
     dbg "specified infile '$infile' is not a regular file."
     temp_infile=$(mktemp)
     dbg "writing infile to temporary file '$temp_infile'."
-    cat "$infile" > "$temp_infile"
+    cat -- "$infile" > "$temp_infile"
     infile=$temp_infile
   else
     dbg "specified infile '$infile' is a regular file."

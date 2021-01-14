@@ -2,6 +2,8 @@
 
 ## Upcoming Version
 
+* Support file names starting with a hyphen ('-').
+
 * Add *forced-folding* to strategy 2.
 
 * Support using a *non-regular* file, e.g., a pipe, as input file.

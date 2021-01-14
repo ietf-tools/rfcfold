@@ -54,7 +54,7 @@ test_file() {
   if [ $expected_exit_code -ne 0 ]; then
     printf "okay.\n"
     if [ $expected_exit_code -eq 255 ]; then
-      rm $2.folded*
+      rm -- $2.folded*
     fi
     return
   fi
@@ -63,12 +63,12 @@ test_file() {
   expected_exit_code=$4
   run_cmd "$command" $expected_exit_code
 
-  command="diff -q $2 $2.folded.unfolded"
+  command="diff -q -- $2 $2.folded.unfolded"
   expected_exit_code=0
   run_cmd "$command" $expected_exit_code
 
   printf "okay.\n"
-  rm $2.folded*
+  rm -- $2.folded*
 }
 
 test_unfoldable_file() {
@@ -84,7 +84,7 @@ test_unfoldable_file() {
 
   printf "okay.\n"
   if [[ $3 -eq 255 ]]; then
-    rm $2.unfolded
+    rm -- $2.unfolded
   fi
 }
 
@@ -99,12 +99,12 @@ test_prefolded_file() {
   expected_exit_code=0
   run_cmd "$command" $expected_exit_code
 
-  command="diff -q $3 $2.unfolded"
+  command="diff -q -- $3 $2.unfolded"
   expected_exit_code=0
   run_cmd "$command" $expected_exit_code
 
   printf "okay.\n"
-  rm $2.unfolded
+  rm -- $2.unfolded
 }
 
 failed_test() {
@@ -117,10 +117,10 @@ test_folding_emits_warning() {
   # $2 : is the extended regular expression to check
   printf -- 'testing that folding %s emits a warning...' "$1"
   if ../rfcfold -i "$1" -o "$1.folded" 2>&1 | grep -Eq "$2"; then
-    rm "$1.folded"
+    rm -- "$1.folded"
     echo okay.
   else
-    rm -f "$1.folded"
+    rm -f -- "$1.folded"
     failed_test
   fi
 }
@@ -257,6 +257,14 @@ main() {
   test_folding_emits_warning contains-del.txt 'Warning:.*ASCII control'
   test_folding_emits_warning contains-utf8.txt 'Warning:.*non-ASCII'
   test_folding_emits_warning empty-file 'Warning:.*is empty'
+  echo
+  echo "starting problematic file name tests..."
+  test_file 0 -example-1.txt           0   0
+  test_file 1 -example-1.txt           0   0
+  test_file 2 -example-1.txt           0   0
+  test_file 0 -example-1.txt         255 255  73
+  test_prefolded_file 1 -unfold-s1.txt -example-1.txt
+  test_prefolded_file 2 -unfold-s2.txt -example-1.txt
   echo
   echo "starting tests that read via pipe from standard input..."
   test_file 0 contains-tab.txt         1   x  69 stdin
