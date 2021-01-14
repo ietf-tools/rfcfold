@@ -156,6 +156,9 @@ main() {
   test_unfoldable_file 2 neither-can-unfold-it-2.txt 1
   test_unfoldable_file 1 neither-can-unfold-it-3.txt 1
   test_unfoldable_file 2 neither-can-unfold-it-3.txt 1
+  test_unfoldable_file 0 unfolding-is-copy.txt       255
+  test_unfoldable_file 1 unfolding-is-copy.txt       255
+  test_unfoldable_file 2 unfolding-is-copy.txt       255
   echo
   echo "starting unfolding smart tests..."
   test_prefolded_file 1 example-3.1.txt.folded.smart example-3.txt
