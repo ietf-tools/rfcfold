@@ -165,18 +165,31 @@ main() {
   test_prefolded_file 2 example-3.2.txt.folded.smart example-3.txt
   echo
   echo "starting old unfolding forced tests..."
-  test_prefolded_file 1 only-2-can-fold-it-7.force-folded.1.txt only-2-can-fold-it-7.txt
-  test_prefolded_file 2 only-2-can-fold-it-7.force-folded.2.txt only-2-can-fold-it-7.txt
-  test_prefolded_file 1 only-2-can-fold-it-8.force-folded.1.txt only-2-can-fold-it-8.txt
-  test_prefolded_file 2 only-2-can-fold-it-8.force-folded.2.txt only-2-can-fold-it-8.txt
+  test_prefolded_file 1 forced-folding-3.force-folded.1.txt forced-folding-3.txt
+  test_prefolded_file 2 forced-folding-3.force-folded.2.txt forced-folding-3.txt
+  test_prefolded_file 1 forced-folding-3.force-folded.1.txt forced-folding-3.txt
+  test_prefolded_file 2 forced-folding-3.force-folded.2.txt forced-folding-3.txt
   echo
   echo "starting new unfolding forced tests..."
   test_prefolded_file 1 example-4.1.txt.folded.forced example-4.txt
   test_prefolded_file 2 example-4.2.txt.folded.forced example-4.txt
   echo
+  echo "starting forced folding tests..."
+  test_file 0 forced-folding-0.txt     0   0
+  test_file 1 forced-folding-0.txt     0   0
+  test_file 2 forced-folding-0.txt     0   0
+  test_file 1 forced-folding-1.txt     0   0
+  test_file 2 forced-folding-1.txt     0   0
+  test_file 1 forced-folding-2.txt     0   0
+  test_file 2 forced-folding-2.txt     0   0
+  test_file 1 forced-folding-3.txt     0   0
+  test_file 2 forced-folding-3.txt     0   0
+  test_file 1 forced-folding-4.txt     0   0
+  test_file 2 forced-folding-4.txt     0   0
+  test_file 1 forced-folding-5.txt     0   0
+  test_file 2 forced-folding-5.txt     0   0
+  echo
   echo "starting only-2 tests..."
-  test_file 1 only-2-can-fold-it-1.txt 1
-  test_file 2 only-2-can-fold-it-1.txt 0   0
   test_file 1 only-2-can-fold-it-2.txt 1
   test_file 2 only-2-can-fold-it-2.txt 0   0
   test_file 1 only-2-can-fold-it-3.txt 1
@@ -185,14 +198,6 @@ main() {
   test_file 2 only-2-can-fold-it-4.txt 0   0
   test_file 1 only-2-can-fold-it-5.txt 1
   test_file 2 only-2-can-fold-it-5.txt 0   0
-  test_file 1 only-2-can-fold-it-6.txt 1
-  test_file 2 only-2-can-fold-it-6.txt 0   0
-  test_file 1 only-2-can-fold-it-7.txt 1
-  test_file 2 only-2-can-fold-it-7.txt 0   0
-  test_file 1 only-2-can-fold-it-8.txt 1
-  test_file 2 only-2-can-fold-it-8.txt 0   0
-  test_file 1 only-2-can-fold-it-9.txt 1
-  test_file 2 only-2-can-fold-it-9.txt 0   0
   test_file 1 spaces-1.txt             1
   test_file 2 spaces-1.txt             0   0
   test_file 1 spaces-2.txt             1
@@ -202,12 +207,12 @@ main() {
   echo
   echo "starting strategy #1 tests..."
   test_file 1 contains-tab.txt         1
-  test_file 1 already-exists.txt       1
+  test_file 1 already-exists.txt       0   0
   test_file 1 folding-needed.txt       0   0
   test_file 1 nofold-needed.txt      255 255
-  test_file 1 nofold-needed.txt        1   x  67
+  test_file 1 nofold-needed.txt        0   0  67
   test_file 1 nofold-needed-again.txt  0   0  67
-  test_file 1 example-4.txt            1   x  67
+  test_file 1 example-4.txt            0   0  67
   echo
   echo "starting strategy #2 tests..."
   test_file 2 contains-tab.txt         1
@@ -280,12 +285,12 @@ main() {
   test_file 0 example-1.txt            0   0  69 stdin
   test_file 0 example-2.txt            0   0  69 stdin
   test_file 0 example-3.txt            0   0  69 stdin
-  test_file 0 only-2-can-fold-it-1.txt 0   0  69 stdin
+  test_file 0 forced-folding-1.txt     0   0  69 stdin
   test_file 1 contains-tab.txt         1   x  69 stdin
-  test_file 1 already-exists.txt       1   x  69 stdin
+  test_file 1 already-exists.txt       0   0  69 stdin
   test_file 1 folding-needed.txt       0   0  69 stdin
   test_file 1 nofold-needed.txt      255 255  69 stdin
-  test_file 1 nofold-needed.txt        1   x  67 stdin
+  test_file 1 nofold-needed.txt        0   0  67 stdin
   test_file 1 nofold-needed-again.txt  0   0  67 stdin
   test_file 2 contains-tab.txt         1   x  69 stdin
   test_file 2 already-exists.txt       0   0  69 stdin

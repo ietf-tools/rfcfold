@@ -4,7 +4,7 @@
 
 * Support file names starting with a hyphen ('-').
 
-* Add *forced folding* to strategy 2.
+* Add *forced folding* to both folding strategies.
 
 * Support using a *non-regular* file, e.g., a pipe, as input file.
   This allows the use of `rfcfold` as any part of a pipeline by using
