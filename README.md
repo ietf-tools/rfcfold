@@ -32,11 +32,11 @@ Exit status code: 1 on error, 0 on success, 255 on no-op.
 
 1. Fold the file `original.txt` and write the result to `folded.txt`:
 
-    rfcfold -i original.txt -o folded.txt
+    `rfcfold -i original.txt -o folded.txt`
 
 2. Unfold the file `folded.txt` and write the result to `unfolded.txt`:
 
-    rfcfold -r -i folded.txt -o unfolded.txt
+    `rfcfold -r -i folded.txt -o unfolded.txt`
 
 ## Limitations
 
@@ -90,4 +90,4 @@ and
 are used if they are available as `ggrep` and `gsed`.
 
 Use of both GNU grep and GNU sed may increase the maximum usable value
-for the folding column over system-provided grep and sed.
+for the folding column over using system-provided grep and sed.
