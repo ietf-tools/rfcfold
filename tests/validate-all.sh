@@ -129,7 +129,8 @@ have_gnu_grep_sed() {
   local GREP SED
   type ggrep > /dev/null 2>&1 && GREP=ggrep || GREP=grep
   type gsed > /dev/null 2>&1 && SED=gsed || SED=sed
-  "$GREP" --version | grep -q GNU && "$SED" --version | grep -q GNU && return 0
+  "$GREP" --version 2>/dev/null | grep -q GNU && \
+    "$SED" --version 2>/dev/null | grep -q GNU && return 0
   return 1
 }
 
