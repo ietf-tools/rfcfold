@@ -38,6 +38,11 @@ Exit status code: 1 on error, 0 on success, 255 on no-op.
 
     `rfcfold -r -i folded.txt -o unfolded.txt`
 
+## Changes between versions
+
+Noteworthy changes between versions of `rfcfold` can be found in the
+[NEWS.md](NEWS.md) file.
+
 ## Limitations
 
 `rfcfold` has some limitations, because its primary intended use is for
