@@ -75,6 +75,7 @@ col_gvn=0  # maxcol overridden?
 hdr_txt_1="NOTE: '\\' line wrapping per RFC 8792"
 hdr_txt_2="NOTE: '\\\\' line wrapping per RFC 8792"
 temp_dir=""
+temp_infile=""
 prog_name='rfcfold'
 prog_version='1.2.1'
 
@@ -103,12 +104,12 @@ dbg() {
 }
 
 # prefer gsed (GNU sed) over the system's default sed
-type gsed > /dev/null 2>&1 && SED=gsed || SED=sed
+type gsed > /dev/null 2>&1 && SED='gsed' || SED='sed'
 # prefer ggrep (GNU grep) over the system's default grep
-type ggrep > /dev/null 2>&1 && GREP=ggrep || GREP=grep
+type ggrep > /dev/null 2>&1 && GREP='ggrep' || GREP='grep'
 
 cleanup() {
-  rm -rf "$temp_dir"
+  rm -rf -- "$temp_dir" "$temp_infile"
 }
 trap 'cleanup' EXIT
 
@@ -121,20 +122,11 @@ equal_chars() {
 }
 
 fold_it_1() {
-  # ensure input file doesn't contain the fold-sequence already
-  if [[ -n "$("$SED" -n '/\\$/p' "$infile")" ]]; then
-    err "infile '$infile' has a line ending with a '\\' character."\
-        "This script cannot fold this file using the '\\' strategy"\
-        "without there being false positives produced in the"\
-        "unfolding."
-    return 1
-  fi
-
   # where to fold
   foldcol=$((maxcol - 1)) # for the inserted '\' char
 
   # ensure input file doesn't contain whitespace on the fold column
-  if "$GREP" -q "^\(.\{$foldcol\}\)\{1,\} " "$infile"; then
+  if "$GREP" -q -- "^\(.\{$foldcol\}\)\{1,\} " "$infile"; then
     err "infile '$infile' has a space character occurring on the"\
         "folding column.  This file cannot be folded using the"\
         "'\\' strategy."
@@ -149,14 +141,14 @@ fold_it_1() {
                      "$hdr_txt_1" "$(equal_chars "$right_sp")")
 
   # generate outfile
-  printf -- '%s\n' "$header" > "$outfile"
-  echo "" >> "$outfile"
+  printf -- '%s\n\n' "$header" > "$outfile"
   # shellcheck disable=SC1004
-  "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
+  "$SED" -- 's/\\$/\\\\\
+  /' "$infile" | "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
 \2/;t M
     b
     :M
-    P;D' < "$infile" >> "$outfile" \
+    P;D' >> "$outfile" \
   || return 1
   return 0
 }
@@ -164,19 +156,6 @@ fold_it_1() {
 fold_it_2() {
   # where to fold
   foldcol=$((maxcol - 1)) # for the inserted '\' char
-
-  # ensure input file doesn't contain the fold-sequence already
-  if [[ -n "$("$SED" -n '/\\$/{
-                N;s/\\\n[ ]*\\/&/p;D
-              }' "$infile")" ]]
-  then
-    err "infile '$infile' has a line ending with a '\\' character"\
-        "followed by a '\\' character as the first non-space"\
-        "character on the next line.  This script cannot fold"\
-        "this file using the '\\\\' strategy without there being"\
-        "false positives produced in the unfolding."
-    return 1
-  fi
 
   # center header text
   length=$((${#hdr_txt_2} + 2))
@@ -186,21 +165,24 @@ fold_it_2() {
                      "$hdr_txt_2" "$(equal_chars "$right_sp")")
 
   # generate outfile
-  printf -- '%s\n' "$header" > "$outfile"
-  echo "" >> "$outfile"
+  printf -- '%s\n\n' "$header" > "$outfile"
   # shellcheck disable=SC1004
+  "$SED" -- '{
+      H;$!d
+    };x;s/^\n//;s/\\\(\n *\\\)/\\\\\
+\\\1/g' "$infile" | \
   "$SED" 's/\(.\{'"$foldcol"'\}\)\(..\)/\1\\\
 \\\2/;t M
     b
     :M
-    P;D' < "$infile" >> "$outfile" \
+    P;D' >> "$outfile" \
   || return 1
   return 0
 }
 
 fold_it() {
   # ensure input file doesn't contain a tab
-  if "$GREP" -q $'\t' "$infile"; then
+  if "$GREP" -q -- $'\t' "$infile"; then
     err "infile '$infile' contains a tab character, which is not"\
         "allowed."
     return 1
@@ -208,22 +190,19 @@ fold_it() {
 
   # folding of input containing ASCII control or non-ASCII characters
   # may result in a wrong folding column and is not supported
-  if type gawk > /dev/null 2>&1; then
-    env LC_ALL=C gawk '/[\000-\014\016-\037\177]/{exit 1}' "$infile"\
-    || warn "infile '$infile' contains ASCII control characters"\
+  od -An -tx1 -- "$infile" | \
+    "$GREP" -Eq '0[0-9]|0[BCEFbcef]|1[0-9A-Fa-f]|7[Ff]' \
+    && warn "infile '$infile' contains ASCII control characters" \
             "(unsupported)."
-    env LC_ALL=C gawk '/[^\000-\177]/{exit 1}' "$infile"\
-    || warn "infile '$infile' contains non-ASCII characters"\
+  od -An -tx1 -- "$infile" | "$GREP" -q '[89A-Fa-f][0-9A-Fa-f]' \
+    && warn "infile '$infile' contains non-ASCII characters" \
             "(unsupported)."
-  else
-    dbg "no GNU awk; skipping checks for special characters."
-  fi
 
   # check if file needs folding
   testcol=$((maxcol + 1))
-  if ! "$GREP" -q ".\{$testcol\}" "$infile"; then
+  if ! "$GREP" -q -- ".\{$testcol\}" "$infile"; then
     dbg "nothing to do; copying infile to outfile."
-    cp "$infile" "$outfile"
+    cp -- "$infile" "$outfile"
     return 255
   fi
 
@@ -252,10 +231,10 @@ unfold_it_1() {
   temp_dir=$(mktemp -d)
 
   # output all but the first two lines (the header) to wip file
-  awk "NR>2" "$infile" > "$temp_dir/wip"
+  awk -- "NR>2" "$infile" > "$temp_dir/wip"
 
   # unfold wip file
-  "$SED" '{
+  "$SED" -- '{
       H;$!d
     };x;s/^\n//;s/\\\n *//g' "$temp_dir/wip" > "$outfile" \
   || return 1
@@ -266,10 +245,10 @@ unfold_it_2() {
   temp_dir=$(mktemp -d)
 
   # output all but the first two lines (the header) to wip file
-  awk "NR>2" "$infile" > "$temp_dir/wip"
+  awk -- "NR>2" "$infile" > "$temp_dir/wip"
 
   # unfold wip file
-  "$SED" '{
+  "$SED" -- '{
       H;$!d
     };x;s/^\n//;s/\\\n *\\//g' "$temp_dir/wip" > "$outfile" \
   || return 1
@@ -278,8 +257,8 @@ unfold_it_2() {
 
 unfold_it() {
   # check if file needs unfolding
-  line=$(head -n 1 "$infile")
-  line2=$("$SED" -n '2p' "$infile")
+  line=$(head -n 1 -- "$infile")
+  line2=$("$SED" -n -- '2p' "$infile")
   if result=$(printf -- '%s\n' "$line" | "$GREP" -F "$hdr_txt_1")
   then
     if [[ -n "$line2" ]]; then
@@ -299,7 +278,7 @@ unfold_it() {
     return $?
   fi
   dbg "nothing to do; copying infile to outfile."
-  cp "$infile" "$outfile"
+  cp -- "$infile" "$outfile"
   return 255
 }
 
@@ -354,6 +333,7 @@ process_input() {
 
   dbg "$prog_name $prog_version using interpreter $BASH" \
       "version $BASH_VERSION on ${BASH_VERSINFO[5]}"
+  dbg "Bash options: $BASHOPTS"
   dbg "sed binary: $(type "$SED")"
   dbg "grep binary: $(type "$GREP")"
 
@@ -367,13 +347,28 @@ process_input() {
     exit 1
   fi
 
-  if [[ ! -f "$infile" ]]; then
+  if [[ ! -e "$infile" ]]; then
     err "specified file '$infile' does not exist."
     exit 1
+  elif [[ ! -r "$infile" ]]; then
+    err "specified infile '$infile' cannot be read."
+  elif [[ ! -f "$infile" ]]; then
+    dbg "specified infile '$infile' is not a regular file."
+    temp_infile=$(mktemp)
+    dbg "writing infile to temporary file '$temp_infile'."
+    cat -- "$infile" > "$temp_infile"
+    infile=$temp_infile
+  else
+    dbg "specified infile '$infile' is a regular file."
   fi
 
-  if [[ "$col_gvn" -eq 1 ]] && [[ "$reversed" -eq 1 ]]; then
-    warn "'-c' option ignored when unfolding (option '-r')."
+  if [[ "$reversed" -eq 1 ]]; then
+    if [[ "$col_gvn" -eq 1 ]]; then
+      warn "'-c' option ignored when unfolding (option '-r')."
+    fi
+    if [[ "$strategy" -ne 0 ]]; then
+      warn "'-s' option ignored when unfolding (option '-r')."
+    fi
   fi
 
   if [[ "$strategy" -eq 0 ]] || [[ "$strategy" -eq 2 ]]; then
@@ -406,6 +401,12 @@ main() {
   fi
 
   process_input "$@"
+
+  dbg "infile='$infile', outfile='$outfile'"
+  dbg "strategy='$strategy', reversed='$reversed'," \
+      "maxcol='$maxcol', col_gvn='$col_gvn'"
+
+  [[ ! -s "$infile" ]] && warn "input file '$infile' is empty"
 
   if [[ "$reversed" -eq 0 ]]; then
     fold_it
