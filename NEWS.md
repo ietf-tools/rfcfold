@@ -1,6 +1,6 @@
 # Noteworthy Changes in rfcfold Releases
 
-## Upcoming Version
+## Version 1.3.0 (2021-01-30)
 
 * Support file names starting with a hyphen ('-').
 
