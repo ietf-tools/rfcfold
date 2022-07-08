@@ -1,9 +1,0 @@
-
-# note: the following line forces the need for the file to be folded
-1234567890123456789012345678901234567890123456789012345678901234567890
-
-# the following line should cause a folding error (ambiguous result)
-\
-\
-
-

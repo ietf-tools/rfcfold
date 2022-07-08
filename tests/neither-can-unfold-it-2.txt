@@ -1,4 +1,0 @@
-[NOTE: '\' line wrapping per RFC 8792]
-this file does not contain a blank 2nd line
-
-...

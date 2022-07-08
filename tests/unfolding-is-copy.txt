@@ -1,4 +1,0 @@
-no first header line
-no empty second line
-no folding sequence for either strategy
--> unfolding means copying this file
